@@ -3,8 +3,6 @@
 #import <EventKitUI/EventKitUI.h>
 #import <EventKit/EventKit.h>
 
-#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
-
 @implementation Calendar
 @synthesize eventStore;
 @synthesize interactiveCallbackId;
@@ -16,22 +14,31 @@
 }
 
 - (void) initEventStoreWithCalendarCapabilities {
-  __block BOOL accessGranted = NO;
-  EKEventStore* eventStoreCandidate = [[EKEventStore alloc] init];
-  if([eventStoreCandidate respondsToSelector:@selector(requestAccessToEntityType:completion:)]) {
+    __block BOOL accessGranted = NO;
+    EKEventStore* eventStoreCandidate = [[EKEventStore alloc] init];
+    
     dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-    [eventStoreCandidate requestAccessToEntityType:EKEntityTypeEvent completion:^(BOOL granted, NSError *error) {
-      accessGranted = granted;
-      dispatch_semaphore_signal(sema);
-    }];
-    dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
-  } else { // we're on iOS 5 or older
-    accessGranted = YES;
-  }
-
-  if (accessGranted) {
-    self.eventStore = eventStoreCandidate;
-  }
+    void (^eventStoreCandidateCompletion)(BOOL, NSError *) = ^void(BOOL granted, NSError *error) {
+        accessGranted = granted;
+        dispatch_semaphore_signal(sema);
+    };
+    
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 170000
+    if (@available(iOS 17.0, *)) {
+        if ([eventStoreCandidate respondsToSelector:@selector(requestFullAccessToEventsWithCompletion:)]) {
+            [eventStoreCandidate requestFullAccessToEventsWithCompletion:eventStoreCandidateCompletion];
+            dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+        }
+    } else
+#endif
+        if ([eventStoreCandidate respondsToSelector:@selector(requestAccessToEntityType:completion:)]) {
+            [eventStoreCandidate requestAccessToEntityType:EKEntityTypeEvent completion:eventStoreCandidateCompletion];
+            dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+        }
+    
+    if (accessGranted) {
+        self.eventStore = eventStoreCandidate;
+    }
 }
 
 #pragma mark Helper Functions
