@@ -4,7 +4,7 @@ This folder contains .yaml files for configuring build actions to use in a plugi
 
 ## Contents
 
-The file setBundleLocalizationsiOS.yaml contains one build actions:
+The file setBundleLocalizationsiOS.yaml contains one build action:
 
 - iOS specific. Adds a `CFBundleLocalizations` entry with multiple language codes to the app's Info.plist file. These are necessary for the Calendar Plugin to work properly.
 
