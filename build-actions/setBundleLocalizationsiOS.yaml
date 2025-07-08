@@ -1,0 +1,12 @@
+platforms:
+  ios:
+    plist:
+      - replace: false
+        entries:
+          - CFBundleLocalizations:
+              - en
+              - de
+              - nl
+              - fr
+              - it
+              - pt-BR
