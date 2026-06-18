@@ -2,3 +2,5 @@ demo/platforms
 demo/plugins
 *.ipr
 .idea/
+node_modules/
+dist/
