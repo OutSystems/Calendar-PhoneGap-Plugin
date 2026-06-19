@@ -1,1 +1,12 @@
+## [5.1.3-OS11]
+
+### 2026-06-19
+
+- chore: Revert "test commit"
+- chore: test commit
+- ci: Trigger release on push to main (#22)
+- docs: Updates to PR template
+- ci: Release and Changelog Automation (#21)
+
+
 
